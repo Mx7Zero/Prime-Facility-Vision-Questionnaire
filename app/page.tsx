@@ -10,7 +10,7 @@ import QuestionSection from '@/components/QuestionSection';
 import SectionNav from '@/components/SectionNav';
 import ReviewScreen from '@/components/ReviewScreen';
 import ConfirmationScreen from '@/components/ConfirmationScreen';
-import { Menu, ChevronLeft, ChevronRight, ClipboardCopy } from 'lucide-react';
+import { Menu, ChevronLeft, ChevronRight, ClipboardCopy, AlertTriangle } from 'lucide-react';
 
 type Screen = 'welcome' | 'questions' | 'review' | 'confirmation';
 
@@ -26,6 +26,14 @@ function isQuestionAnswered(response: QuestionResponse | undefined, type: string
   }
 }
 
+function isPercentageValid(response: QuestionResponse | undefined): boolean {
+  if (!response) return true; // not answered yet, not invalid
+  const allocs = (response as PercentageResponse).allocations;
+  if (!allocs) return true;
+  const total = Object.values(allocs).reduce((sum, val) => sum + val, 0);
+  return total <= 100;
+}
+
 export default function HomePage() {
   const [screen, setScreen] = useState<Screen>('welcome');
   const [respondent, setRespondent] = useState<Respondent>({ name: '', email: '', role: '' });
@@ -35,6 +43,7 @@ export default function HomePage() {
   const [sidenavOpen, setSidenavOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -94,6 +103,22 @@ export default function HomePage() {
   };
 
   const handleNextSection = () => {
+    const section = sections[currentSection];
+    // Check all questions are answered
+    const unanswered = section.questions.filter(q => !isQuestionAnswered(responses[q.id], q.type));
+    if (unanswered.length > 0) {
+      setValidationError(`Please answer all ${section.questions.length} questions before continuing. ${unanswered.length} remaining.`);
+      setTimeout(() => setValidationError(null), 4000);
+      return;
+    }
+    // Check percentage questions don't exceed 100%
+    const invalidPct = section.questions.find(q => q.type === 'percentage' && !isPercentageValid(responses[q.id]));
+    if (invalidPct) {
+      setValidationError('Total allocation cannot exceed 100%. Please adjust before continuing.');
+      setTimeout(() => setValidationError(null), 4000);
+      return;
+    }
+    setValidationError(null);
     if (currentSection < sections.length - 1) {
       setCurrentSection((prev) => prev + 1);
       setTimeout(() => window.scrollTo(0, 0), 50);
@@ -364,15 +389,29 @@ export default function HomePage() {
 
             <button
               onClick={handleNextSection}
-              className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg font-body text-sm
-                bg-accent-cyan/10 border border-accent-cyan/30 text-accent-cyan
-                hover:bg-accent-cyan/20 hover:shadow-glow-cyan
-                transition-all duration-200 active:scale-[0.98]"
+              className={`flex items-center gap-1.5 px-5 py-2.5 rounded-lg font-body text-sm
+                transition-all duration-200 active:scale-[0.98]
+                ${
+                  sections[currentSection].questions.every(q => isQuestionAnswered(responses[q.id], q.type))
+                    ? 'bg-accent-cyan/10 border border-accent-cyan/30 text-accent-cyan hover:bg-accent-cyan/20 hover:shadow-glow-cyan'
+                    : 'bg-bg-tertiary border border-border text-text-tertiary'
+                }
+              `}
             >
               {currentSection === sections.length - 1 ? 'Review' : 'Next'}
               <ChevronRight size={16} />
             </button>
           </div>
+
+          {/* Validation Error Toast */}
+          {validationError && (
+            <div className="max-w-[720px] mx-auto px-4 pb-3 animate-fade-in-up">
+              <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent-magenta/10 border border-accent-magenta/30">
+                <AlertTriangle size={16} className="text-accent-magenta flex-shrink-0" />
+                <span className="font-body text-sm text-accent-magenta">{validationError}</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

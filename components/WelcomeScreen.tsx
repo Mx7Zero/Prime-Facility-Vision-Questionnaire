@@ -20,16 +20,17 @@ export default function WelcomeScreen({
   const [name, setName] = useState(savedName || '');
   const [email, setEmail] = useState(savedEmail || '');
   const [role, setRole] = useState('');
-  const [errors, setErrors] = useState<{ name?: string; email?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string; email?: string; role?: string }>({});
 
   const validateEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const newErrors: { name?: string; email?: string } = {};
+    const newErrors: { name?: string; email?: string; role?: string } = {};
     if (!name.trim()) newErrors.name = 'Name is required';
     if (!email.trim()) newErrors.email = 'Email is required';
     else if (!validateEmail(email)) newErrors.email = 'Enter a valid email';
+    if (!role.trim()) newErrors.role = 'Role / Title is required';
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -139,19 +140,20 @@ export default function WelcomeScreen({
           {/* Role */}
           <div>
             <label htmlFor="role" className="block font-mono text-xs text-text-tertiary mb-1.5 uppercase tracking-wider">
-              Role / Title <span className="text-text-tertiary">(optional)</span>
+              Role / Title <span className="text-accent-magenta">*</span>
             </label>
             <input
               id="role"
               type="text"
               value={role}
-              onChange={(e) => setRole(e.target.value)}
+              onChange={(e) => { setRole(e.target.value); if (errors.role) setErrors(prev => ({ ...prev, role: undefined })); }}
               placeholder="e.g. Investor, Partner, Operations Lead"
-              className="w-full px-4 py-3.5 rounded-lg bg-bg-secondary border border-border
+              className={`w-full px-4 py-3.5 rounded-lg bg-bg-secondary border
                 text-text-primary font-body text-[15px] placeholder:text-text-tertiary
                 focus:border-accent-cyan focus:shadow-glow-cyan focus:outline-none
-                transition-all duration-200"
+                transition-all duration-200 ${errors.role ? 'border-accent-magenta' : 'border-border'}`}
             />
+            {errors.role && <p className="mt-1 text-accent-magenta text-xs font-mono">{errors.role}</p>}
           </div>
 
           {/* Submit */}

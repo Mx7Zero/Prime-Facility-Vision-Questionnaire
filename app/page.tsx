@@ -96,17 +96,17 @@ export default function HomePage() {
   const handleNextSection = () => {
     if (currentSection < sections.length - 1) {
       setCurrentSection((prev) => prev + 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => window.scrollTo(0, 0), 50);
     } else {
       setScreen('review');
-      window.scrollTo(0, 0);
+      setTimeout(() => window.scrollTo(0, 0), 50);
     }
   };
 
   const handlePrevSection = () => {
     if (currentSection > 0) {
       setCurrentSection((prev) => prev - 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => window.scrollTo(0, 0), 50);
     }
   };
 

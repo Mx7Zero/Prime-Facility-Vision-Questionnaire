@@ -62,7 +62,7 @@ export default function MultiSelect({
 
   return (
     <div className="flex flex-col gap-2.5">
-      {maxSelections && (
+      {maxSelections ? (
         <div className="flex items-center justify-between mb-1">
           <span className="text-text-secondary text-sm font-body">
             Select up to {maxSelections}
@@ -75,6 +75,12 @@ export default function MultiSelect({
             }`}
           >
             {selectionCount}/{maxSelections}
+          </span>
+        </div>
+      ) : (
+        <div className="mb-1">
+          <span className="text-accent-cyan text-sm font-body italic">
+            Select all that apply
           </span>
         </div>
       )}

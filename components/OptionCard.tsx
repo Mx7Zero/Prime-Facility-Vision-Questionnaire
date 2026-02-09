@@ -79,7 +79,7 @@ export default function OptionCard({
 
       {/* Label */}
       <span
-        className={`flex-1 ${selected ? 'text-text-primary' : 'text-text-secondary'}`}
+        className={`flex-1 ${selected ? 'text-white font-medium' : 'text-text-primary'}`}
       >
         {label}
       </span>

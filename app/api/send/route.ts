@@ -266,7 +266,7 @@ export async function POST(request: NextRequest) {
 
     const resend = new Resend(apiKey);
 
-    // Send to owner (matthew@chrestenson.com)
+    // Send to owner (matthew@chrestenson.com) — full response summary
     const ownerEmailPromise = resend.emails.send({
       from: fromAddress,
       to: recipientEmail,
@@ -274,10 +274,11 @@ export async function POST(request: NextRequest) {
       html: buildOwnerEmailHtml(payload),
     });
 
-    // Send full copy to respondent
+    // Send full copy to respondent, CC owner so owner gets a copy even if direct send fails
     const confirmEmailPromise = resend.emails.send({
       from: fromAddress,
       to: payload.respondent.email,
+      cc: recipientEmail,
       subject: 'Your Facility Vision Responses — Copy',
       html: buildRespondentCopyHtml(payload),
     });
@@ -287,12 +288,30 @@ export async function POST(request: NextRequest) {
       confirmEmailPromise,
     ]);
 
+    // Log detailed results for debugging
+    const results = {
+      owner: ownerResult.status === 'fulfilled'
+        ? { success: true, id: (ownerResult.value as any)?.data?.id }
+        : { success: false, error: String((ownerResult as any).reason?.message || ownerResult) },
+      respondent: confirmResult.status === 'fulfilled'
+        ? { success: true, id: (confirmResult.value as any)?.data?.id }
+        : { success: false, error: String((confirmResult as any).reason?.message || confirmResult) },
+    };
+    console.log('Email send results:', JSON.stringify(results));
+
     const errors: string[] = [];
     if (ownerResult.status === 'rejected') {
-      errors.push(`Owner email failed: ${ownerResult.reason}`);
+      errors.push(`Owner email failed: ${(ownerResult as any).reason?.message || ownerResult.reason}`);
+    }
+    // Check for Resend API errors in fulfilled results
+    if (ownerResult.status === 'fulfilled' && (ownerResult.value as any)?.error) {
+      errors.push(`Owner email error: ${JSON.stringify((ownerResult.value as any).error)}`);
     }
     if (confirmResult.status === 'rejected') {
-      errors.push(`Confirmation email failed: ${confirmResult.reason}`);
+      errors.push(`Confirmation email failed: ${(confirmResult as any).reason?.message || confirmResult.reason}`);
+    }
+    if (confirmResult.status === 'fulfilled' && (confirmResult.value as any)?.error) {
+      errors.push(`Confirmation email error: ${JSON.stringify((confirmResult.value as any).error)}`);
     }
 
     if (errors.length > 0) {

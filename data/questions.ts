@@ -176,8 +176,7 @@ export const sections: Section[] = [
       {
         id: 's2',
         text: 'What sports are your PRIMARY revenue drivers?',
-        type: 'rank',
-        rankSlots: 3,
+        type: 'multi',
         options: [
           'Baseball / Softball',
           'Volleyball',

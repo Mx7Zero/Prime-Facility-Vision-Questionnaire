@@ -21,10 +21,34 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Prime Facility Vision Questionnaire',
+  title: 'Prime Facility Vision | 60,000 SF Sports Performance + Longevity — Phoenix, AZ',
   description:
-    '60,000 SF Sports Performance + Longevity Facility — Phoenix, AZ. Share your vision.',
-  robots: 'noindex, nofollow',
+    'Help design a world-class 60,000 SF facility combining elite sports performance training, cutting-edge longevity medicine, GLP-1 programs, and regenerative therapies. Your vision shapes every square foot. Phoenix, AZ.',
+  keywords: [
+    'sports performance facility',
+    'longevity clinic',
+    'Phoenix AZ',
+    'GLP-1',
+    'regenerative medicine',
+    'athletic training',
+    'biohacking',
+    'sports medicine',
+  ],
+  openGraph: {
+    type: 'website',
+    title: 'Prime Facility Vision — 60,000 SF Sports + Longevity Facility',
+    description:
+      '🏗️ We\'re building a 60,000 SF sports performance + longevity medicine facility in Phoenix, AZ. Elite training. Cutting-edge science. GLP-1 & regenerative medicine. Your input shapes the vision.',
+    siteName: 'Prime Facility Vision',
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Prime Facility Vision — 60K SF Sports + Longevity Facility',
+    description:
+      '🏗️ 60,000 SF. Elite sports training. Longevity medicine. GLP-1 programs. Phoenix, AZ. Help us design the future — take the questionnaire.',
+  },
+  robots: 'index, follow',
 };
 
 export const viewport: Viewport = {

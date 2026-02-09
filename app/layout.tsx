@@ -21,6 +21,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_URL || 'https://prime-facility-vision-questionnaire.vercel.app'),
   title: 'Prime Facility Vision | 60,000 SF Sports Performance + Longevity — Phoenix, AZ',
   description:
     'Help design a world-class 60,000 SF facility combining elite sports performance training, cutting-edge longevity medicine, GLP-1 programs, and regenerative therapies. Your vision shapes every square foot. Phoenix, AZ.',
@@ -41,12 +42,21 @@ export const metadata: Metadata = {
       '🏗️ We\'re building a 60,000 SF sports performance + longevity medicine facility in Phoenix, AZ. Elite training. Cutting-edge science. GLP-1 & regenerative medicine. Your input shapes the vision.',
     siteName: 'Prime Facility Vision',
     locale: 'en_US',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Prime Facility Vision — 60,000 SF Sports Performance + Longevity Facility',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Prime Facility Vision — 60K SF Sports + Longevity Facility',
     description:
       '🏗️ 60,000 SF. Elite sports training. Longevity medicine. GLP-1 programs. Phoenix, AZ. Help us design the future — take the questionnaire.',
+    images: ['/og-image.png'],
   },
   robots: 'index, follow',
 };

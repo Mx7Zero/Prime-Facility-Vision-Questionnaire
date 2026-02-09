@@ -2,17 +2,19 @@
 
 import React from 'react';
 import { PercentageResponse } from '@/lib/types';
-import { Minus, Plus } from 'lucide-react';
+import { Minus, Plus, Sparkles } from 'lucide-react';
 
 interface PercentageAllocatorProps {
   questionId: string;
   zones: string[];
+  recommendedAllocations?: Record<string, number>;
   value: PercentageResponse | null;
   onChange: (response: PercentageResponse) => void;
 }
 
 export default function PercentageAllocator({
   zones,
+  recommendedAllocations,
   value,
   onChange,
 }: PercentageAllocatorProps) {
@@ -26,6 +28,12 @@ export default function PercentageAllocator({
     // Remove zero values
     if (newVal === 0) delete newAllocations[zone];
     onChange({ allocations: newAllocations });
+  };
+
+  const handleUseRecommended = () => {
+    if (recommendedAllocations) {
+      onChange({ allocations: { ...recommendedAllocations } });
+    }
   };
 
   const getTotalColor = () => {
@@ -46,18 +54,41 @@ export default function PercentageAllocator({
         Allocate 60,000 SF across zones. Use +/- buttons (increments of 5%).
       </div>
 
+      {recommendedAllocations && (
+        <button
+          type="button"
+          onClick={handleUseRecommended}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg
+            border border-accent-cyan/40 bg-accent-cyan/5
+            text-accent-cyan font-body text-sm font-medium
+            hover:bg-accent-cyan/10 hover:border-accent-cyan/60
+            active:scale-[0.98] transition-all duration-200"
+        >
+          <Sparkles size={16} />
+          Use Industry Standard Recommendations
+        </button>
+      )}
+
       {zones.map((zone) => {
         const pct = allocations[zone] || 0;
         const sqft = Math.round((pct / 100) * 60000);
+        const rec = recommendedAllocations?.[zone];
         return (
           <div
             key={zone}
             className="glass-card rounded-lg p-3 flex flex-col gap-2"
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="font-body text-[14px] text-text-secondary flex-1 leading-tight">
-                {zone}
-              </span>
+              <div className="flex-1 min-w-0">
+                <span className="font-body text-[14px] text-text-primary leading-tight block">
+                  {zone}
+                </span>
+                {rec !== undefined && (
+                  <span className="font-mono text-[11px] text-accent-cyan/70 leading-tight">
+                    Recommended: {rec}% ({(rec / 100 * 60000).toLocaleString()} SF)
+                  </span>
+                )}
+              </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button
                   type="button"

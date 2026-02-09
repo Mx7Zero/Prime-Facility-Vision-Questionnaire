@@ -83,6 +83,7 @@ export default function QuestionSection({
               <PercentageAllocator
                 questionId={question.id}
                 zones={question.zones || []}
+                recommendedAllocations={question.recommendedAllocations}
                 value={(responses[question.id] as PercentageResponse) || null}
                 onChange={(resp) => onResponse(question.id, resp)}
               />

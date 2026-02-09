@@ -11,6 +11,7 @@ export interface Question {
   maxSelections?: number;
   rankSlots?: number;
   zones?: string[];
+  recommendedAllocations?: Record<string, number>;
 }
 
 export interface Section {

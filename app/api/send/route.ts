@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { sections } from '@/data/questions';
 import { SubmissionPayload, SingleResponse, MultiResponse, TextResponse, RankResponse, PercentageResponse, QuestionResponse } from '@/lib/types';
+import { storeSubmission } from '@/lib/redis';
 
 function formatResponseForEmail(response: QuestionResponse | undefined, type: string): string {
   if (!response) return '<span style="color:#555577;">— Not answered —</span>';
@@ -254,6 +255,19 @@ export async function POST(request: NextRequest) {
     const apiKey = process.env.RESEND_API_KEY;
     const recipientEmail = process.env.RECIPIENT_EMAIL || 'matthew@chrestenson.com';
     const fromAddress = process.env.FROM_EMAIL || 'Prime Facility Vision <onboarding@resend.dev>';
+
+    // Store submission in Redis (always, regardless of email config)
+    try {
+      const submissionId = await storeSubmission({
+        respondent: payload.respondent,
+        responses: payload.responses,
+        completionRate: payload.completionRate,
+        submittedAt: payload.submittedAt,
+      });
+      console.log('Submission stored:', submissionId);
+    } catch (storeError) {
+      console.error('Failed to store submission:', storeError);
+    }
 
     if (!apiKey || apiKey === 're_xxxxxxxxxxxx') {
       // Fallback: return success anyway but log that email wasn't sent

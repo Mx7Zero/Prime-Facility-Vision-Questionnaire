@@ -174,6 +174,72 @@ function buildConfirmationEmailHtml(payload: SubmissionPayload): string {
   `;
 }
 
+function buildRespondentCopyHtml(payload: SubmissionPayload): string {
+  const sectionHtmls = sections.map((section) => {
+    const questionHtmls = section.questions.map((q) => {
+      return `
+        <div style="margin-bottom:16px;">
+          <div style="font-size:13px;color:#8888AA;margin-bottom:4px;">${q.text}</div>
+          <div style="font-size:14px;color:#E8E8F0;">
+            ${formatResponseForEmail(payload.responses[q.id], q.type)}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div style="margin-bottom:24px;">
+        <div style="background:#12121A;border:1px solid #2A2A3E;border-radius:8px;overflow:hidden;">
+          <div style="padding:12px 16px;background:linear-gradient(135deg,#12121A,#1A1A2E);border-bottom:1px solid #2A2A3E;">
+            <span style="font-size:16px;margin-right:8px;">${section.icon}</span>
+            <span style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;font-weight:bold;color:#00F0FF;text-transform:uppercase;letter-spacing:2px;">${String(section.number).padStart(2, '0')} — ${section.title}</span>
+          </div>
+          <div style="padding:16px;">
+            ${questionHtmls}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"/></head>
+    <body style="margin:0;padding:0;background-color:#0A0A0F;font-family:'Helvetica Neue',Arial,sans-serif;">
+      <div style="max-width:640px;margin:0 auto;padding:32px 16px;">
+        <div style="text-align:center;margin-bottom:32px;">
+          <h1 style="font-size:22px;color:#00F0FF;letter-spacing:4px;text-transform:uppercase;margin:0 0 8px;">
+            Your Facility Vision Responses
+          </h1>
+          <div style="height:2px;width:80px;margin:0 auto 16px;background:linear-gradient(90deg,#00F0FF,#39FF14);border-radius:1px;"></div>
+          <div style="font-size:13px;color:#8888AA;">
+            Submitted ${new Date(payload.submittedAt).toLocaleString()} — ${payload.completionRate}% Complete
+          </div>
+        </div>
+
+        <div style="background:#12121A;border:1px solid #2A2A3E;border-radius:8px;padding:16px;margin-bottom:24px;">
+          <p style="color:#E8E8F0;font-size:15px;line-height:1.6;margin:0 0 12px;">
+            Hi ${payload.respondent.name}, here's a copy of all your responses for your records.
+          </p>
+          <p style="color:#8888AA;font-size:13px;line-height:1.6;margin:0;">
+            We'll be in touch within 48 hours to discuss next steps.
+          </p>
+        </div>
+
+        ${sectionHtmls}
+
+        <div style="text-align:center;padding:24px 0;border-top:1px solid #2A2A3E;">
+          <div style="font-size:11px;color:#555577;">
+            Prime Facility Vision Questionnaire — ${new Date().getFullYear()}
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const payload: SubmissionPayload = await request.json();
@@ -186,7 +252,8 @@ export async function POST(request: NextRequest) {
     }
 
     const apiKey = process.env.RESEND_API_KEY;
-    const recipientEmail = process.env.RECIPIENT_EMAIL;
+    const recipientEmail = process.env.RECIPIENT_EMAIL || 'matthew@chrestenson.com';
+    const fromAddress = process.env.FROM_EMAIL || 'Prime Facility Vision <onboarding@resend.dev>';
 
     if (!apiKey || apiKey === 're_xxxxxxxxxxxx') {
       // Fallback: return success anyway but log that email wasn't sent
@@ -199,20 +266,20 @@ export async function POST(request: NextRequest) {
 
     const resend = new Resend(apiKey);
 
-    // Send to owner
+    // Send to owner (matthew@chrestenson.com)
     const ownerEmailPromise = resend.emails.send({
-      from: 'Prime Facility Vision <onboarding@resend.dev>',
-      to: recipientEmail || 'delivered@resend.dev',
+      from: fromAddress,
+      to: recipientEmail,
       subject: `Facility Vision Response — ${payload.respondent.name} (${payload.completionRate}%)`,
       html: buildOwnerEmailHtml(payload),
     });
 
-    // Send confirmation to respondent
+    // Send full copy to respondent
     const confirmEmailPromise = resend.emails.send({
-      from: 'Prime Facility Vision <onboarding@resend.dev>',
+      from: fromAddress,
       to: payload.respondent.email,
-      subject: 'Your Facility Vision — Received',
-      html: buildConfirmationEmailHtml(payload),
+      subject: 'Your Facility Vision Responses — Copy',
+      html: buildRespondentCopyHtml(payload),
     });
 
     const [ownerResult, confirmResult] = await Promise.allSettled([

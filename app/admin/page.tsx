@@ -25,7 +25,14 @@ function formatResponse(response: any, type: string): string {
     }
     case 'multi': {
       const r = response as MultiResponse;
-      if (!r.selected || r.selected.length === 0) return '— Not answered —';
+      if (!r.selected) return '— Not answered —';
+      // Handle legacy single-select responses that are now multi-select
+      if (typeof r.selected === 'string') {
+        const s = r.selected as string;
+        if (s === '__other__') return r.other || 'Other';
+        return r.other ? `${s} (Other: ${r.other})` : s;
+      }
+      if (r.selected.length === 0) return '— Not answered —';
       const items = r.selected.filter(s => s !== '__other__');
       if (r.selected.includes('__other__') && r.other) items.push(`Other: ${r.other}`);
       return items.join(', ');

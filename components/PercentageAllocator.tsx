@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { PercentageResponse } from '@/lib/types';
 import { Minus, Plus, Sparkles } from 'lucide-react';
 
@@ -21,6 +21,9 @@ export default function PercentageAllocator({
   const allocations = value?.allocations || {};
   const total = Object.values(allocations).reduce((sum, val) => sum + val, 0);
 
+  const [editingZone, setEditingZone] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState('');
+
   const handleChange = (zone: string, delta: number) => {
     const current = allocations[zone] || 0;
     const newVal = Math.max(0, Math.min(100, current + delta));
@@ -28,6 +31,20 @@ export default function PercentageAllocator({
     // Remove zero values
     if (newVal === 0) delete newAllocations[zone];
     onChange({ allocations: newAllocations });
+  };
+
+  const handleDirectInput = (zone: string) => {
+    setEditingZone(zone);
+    setEditValue(String(allocations[zone] || 0));
+  };
+
+  const commitDirectInput = (zone: string) => {
+    const parsed = parseInt(editValue, 10);
+    const newVal = isNaN(parsed) ? 0 : Math.max(0, Math.min(100, parsed));
+    const newAllocations = { ...allocations, [zone]: newVal };
+    if (newVal === 0) delete newAllocations[zone];
+    onChange({ allocations: newAllocations });
+    setEditingZone(null);
   };
 
   const handleUseRecommended = () => {
@@ -51,7 +68,7 @@ export default function PercentageAllocator({
   return (
     <div className="flex flex-col gap-3">
       <div className="text-text-secondary text-sm font-body mb-1">
-        Allocate 60,000 SF across zones. Use +/- buttons (increments of 5%).
+        Allocate 60,000 SF across zones. Tap the percentage to type a value, or use +/- (increments of 5%).
       </div>
 
       {recommendedAllocations && (
@@ -103,13 +120,40 @@ export default function PercentageAllocator({
                 >
                   <Minus size={16} />
                 </button>
-                <span
-                  className={`font-mono text-sm w-12 text-center font-bold ${
-                    pct > 0 ? 'text-accent-cyan' : 'text-text-tertiary'
-                  }`}
-                >
-                  {pct}%
-                </span>
+                {editingZone === zone ? (
+                  <div className="relative w-14">
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      min={0}
+                      max={100}
+                      autoFocus
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onBlur={() => commitDirectInput(zone)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') commitDirectInput(zone);
+                        if (e.key === 'Escape') setEditingZone(null);
+                      }}
+                      className="w-14 h-8 rounded bg-bg-primary border border-accent-cyan
+                        text-accent-cyan font-mono text-sm font-bold text-center
+                        focus:outline-none focus:ring-1 focus:ring-accent-cyan
+                        [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handleDirectInput(zone)}
+                    className={`font-mono text-sm w-14 h-8 text-center font-bold rounded
+                      transition-all duration-150 hover:bg-bg-primary/50 active:scale-95
+                      ${pct > 0 ? 'text-accent-cyan' : 'text-text-tertiary'}`}
+                    aria-label={`Edit ${zone} percentage`}
+                  >
+                    {pct}%
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => handleChange(zone, 5)}

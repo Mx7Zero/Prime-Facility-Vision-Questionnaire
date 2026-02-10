@@ -746,7 +746,7 @@ export const sections: Section[] = [
       {
         id: 'sp1',
         text: 'Building approach?',
-        type: 'single',
+        type: 'multi',
         options: [
           'Ground-up new construction (design from scratch)',
           'Conversion of existing industrial/warehouse shell',
@@ -759,7 +759,7 @@ export const sections: Section[] = [
       {
         id: 'sp1b',
         text: 'Preferred sub-market in Phoenix metro for site selection?',
-        type: 'single',
+        type: 'multi',
         options: [
           'North Phoenix (high athlete density, near EXOS but accessible)',
           'Scottsdale (luxury/executive draw, proximity to Banner)',
@@ -819,13 +819,15 @@ export const sections: Section[] = [
       {
         id: 'sp3',
         text: 'Ceiling height requirements?',
-        type: 'single',
+        type: 'multi',
         options: [
           '24-30 ft clear (standard for volleyball / batting cages)',
           '30-40 ft clear (allows for more sports, better spectator views)',
           'Variable — high ceilings in court areas, lower in clinic/recovery',
           'Not sure — need architect guidance',
         ],
+        hasOther: true,
+        otherLabel: 'Additional notes:',
       },
       {
         id: 'sp4',
@@ -845,7 +847,7 @@ export const sections: Section[] = [
       {
         id: 'sp5',
         text: 'Parking requirements?',
-        type: 'single',
+        type: 'multi',
         options: [
           'Standard — 4-5 spaces per 1,000 SF (240-300 spots)',
           'Heavy events — 6+ spaces per 1,000 SF (360+ spots)',
@@ -853,11 +855,13 @@ export const sections: Section[] = [
           'Valet service for premium members',
           'Not sure — depends on site',
         ],
+        hasOther: true,
+        otherLabel: 'Additional notes:',
       },
       {
         id: 'sp6',
         text: 'Architectural vibe?',
-        type: 'single',
+        type: 'multi',
         options: [
           'Sleek & modern — glass, steel, clean lines (think Apple Store meets gym)',
           'Industrial-athletic — exposed steel, concrete, raw materials',
@@ -870,7 +874,7 @@ export const sections: Section[] = [
       {
         id: 'sp7',
         text: "How should Arizona's extreme heat / desert climate influence design decisions?",
-        type: 'single',
+        type: 'multi',
         options: [
           'Fully indoor focus — minimize outdoor training to avoid heat risks',
           'Limited outdoor (shaded turf only, no exposed plunges/pools)',

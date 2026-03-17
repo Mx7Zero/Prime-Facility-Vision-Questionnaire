@@ -35,8 +35,8 @@ function isPercentageValid(response: QuestionResponse | undefined): boolean {
 }
 
 export default function HomePage() {
-  const [screen, setScreen] = useState<Screen>('welcome');
-  const [respondent, setRespondent] = useState<Respondent>({ name: '', email: '', role: '' });
+  const [screen, setScreen] = useState<Screen>('questions');
+  const [respondent, setRespondent] = useState<Respondent>({ name: 'Portfolio Visitor', email: 'visitor@example.com', role: 'Viewer' });
   const [responses, setResponses] = useState<Record<string, QuestionResponse>>({});
   const [currentSection, setCurrentSection] = useState(0);
   const [hasSavedProgress, setHasSavedProgress] = useState(false);

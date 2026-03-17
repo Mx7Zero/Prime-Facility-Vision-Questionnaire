@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSubmissions, getSubmissionCount, deleteSubmission } from '@/lib/redis';
 
-function isAuthorized(request: NextRequest): boolean {
-  const authHeader = request.headers.get('authorization');
-  const adminPassword = process.env.ADMIN_PASSWORD || 'prime2026';
-
-  if (!authHeader) return false;
-  const token = authHeader.replace('Bearer ', '');
-  return token === adminPassword;
+function isAuthorized(_request: NextRequest): boolean {
+  // Auth disabled — public access
+  return true;
 }
 
 export async function GET(request: NextRequest) {

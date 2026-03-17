@@ -60,8 +60,8 @@ function formatResponse(response: any, type: string): string {
 
 export default function AdminPage() {
   const [password, setPassword] = useState('');
-  const [authed, setAuthed] = useState(false);
-  const [authToken, setAuthToken] = useState('');
+  const [authed, setAuthed] = useState(true);
+  const [authToken, setAuthToken] = useState('open');
   const [submissions, setSubmissions] = useState<StoredSubmission[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -90,6 +90,10 @@ export default function AdminPage() {
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    fetchSubmissions('open');
+  }, [fetchSubmissions]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
